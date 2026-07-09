@@ -1,6 +1,6 @@
-package net.likelion.bebc25.spring;
+package net.likelion.bebc25.spring.aop.staticproxy;
 
-public class HybirdCar implements Car {
+public class GasolineCar implements Car {
     @Override
     public void startEngine(){
         System.out.println("start the engine");
@@ -8,7 +8,7 @@ public class HybirdCar implements Car {
 
     @Override
     public void drive(){
-        System.out.println("driving by gasoline & electric");
+        System.out.println("driving by gasoline");
     }
 
     @Override

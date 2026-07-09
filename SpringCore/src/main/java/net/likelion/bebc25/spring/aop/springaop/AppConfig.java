@@ -1,9 +1,11 @@
-package net.likelion.bebc25.spring;
+package net.likelion.bebc25.spring.aop.springaop;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @Configuration
+@EnableAspectJAutoProxy // 스프링 컨테이너에서 @Aspect 빈을 찾아 프로시 처리하도록 지시
 public class AppConfig {
     @Bean
     public Car car(){
@@ -14,5 +16,10 @@ public class AppConfig {
     @Bean
     public Driver driver(Car car){
         return new Driver(car);
+    }
+
+    @Bean
+    public LoggingAspect loggingAspect(){
+        return new LoggingAspect();
     }
 }
