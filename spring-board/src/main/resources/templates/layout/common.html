@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>스프링 게시판 - Fragment</title>
+    <link rel="stylesheet" href="@{../../static/board/css/common.css}">
+    <link rel="stylesheet" href="@{/board/css/write.css}">
+</head>
+<body>
+<div class="container">
+    <h1>타이틀</h1>
+    <div class="nav" th:fragment="nav-header">
+        <a th:href="@{list.html}"}>새글</a>
+        <a href="@{write.html}">목록으로 이동</a>
+    </div>
+
+</div>
+</body>
+</html>

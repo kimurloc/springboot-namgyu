@@ -1,9 +1,11 @@
 package net.likelion.bebc25.board02.post.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import net.likelion.bebc25.board02.post.dto.PostDto;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,6 +26,7 @@ public class BoardController {
         post1.setTitle("1번 게시글");
         post1.setContent("1번 게시글 내용입니다.");
         post1.setAuthor("하루");
+        post1.setSecret(true);
         post1.setCreatedAt(LocalDateTime.now());
 
         PostDto post2 = new PostDto();
@@ -31,6 +34,7 @@ public class BoardController {
         post2.setTitle("2번 게시글");
         post2.setContent("2번 게시글 내용입니다.");
         post2.setAuthor("나무");
+        post1.setSecret(false);
         post2.setCreatedAt(LocalDateTime.now());
 
         fakePosts.add(post1);
@@ -55,34 +59,31 @@ public class BoardController {
     // 게시글 상세 조회하는 컨트롤러
     @GetMapping("/detail.html")
     public String getDetail(@RequestParam("id") int id, Model model){
-        PostDto post = null;
-        for(PostDto target : getPosts()){
-            if(target.getId() == id){
-                post = target;
-                break;
-            }
-        }
+        PostDto post = getPost(id);
         model.addAttribute("post", post);
         return "board/detail";
     }
 
+    public PostDto getPost(int id){
+        for(PostDto target : getPosts()){
+            if(target.getId() == id){
+                return target;
+            }
+        }
+        throw new IllegalArgumentException(id + "번 게시글은 존재하지 않습니다.");
+    }
+
     // 게시글 등록 화면을 요청하는 컨트롤러
     @GetMapping("/write.html")
-    public String getWriteForm(Model model){
-        model.addAttribute("postForm", new PostDto());
+    public String getWriteForm(@ModelAttribute("postForm") PostDto post){
+        //model.addAttribute("postForm", new PostDto());
         return "board/write";
     }
 
     // 게시글 수정 화면을 요청하는 컨트롤러
     @GetMapping("/edit.html")
     public String getEditForm(@RequestParam("id") int id, Model model){
-        PostDto post = null;
-        for(PostDto target : getPosts()){
-            if(target.getId() == id){
-                post = target;
-                break;
-            }
-        }
+        PostDto post = getPost(id);
         model.addAttribute("postForm", post);
         return "board/write";
     }
@@ -90,13 +91,12 @@ public class BoardController {
 
     // 게시글 등록 요청을 처리하는 컨트롤러
     @PostMapping("/write")
-    public String writePost(@RequestParam("title") String title,
-                            @RequestParam("content") String content,
-                            @RequestParam("author") String author){
-
-        PostDto post = new PostDto(title, content, author);
+    public String writePost(@Valid @ModelAttribute("postForm") PostDto post,
+                            BindingResult bindingResult){
         log.debug(post.toString());
-
+        if(bindingResult.hasFieldErrors()){
+            return "board/write";
+        }
         savePost(post);
 
         return "redirect:list.html"; // 브라우저에 list.html로 재요청하라고 응답
@@ -112,8 +112,12 @@ public class BoardController {
 
     // 게시글 수정 요청을 처리하는 컨트롤러
     @PostMapping("/edit")
-    public String editPost(@ModelAttribute PostDto post){
+    public String editPost(@Valid @ModelAttribute("postForm") PostDto post,
+                           BindingResult bindingResult){
         log.debug(post.toString());
+        if(bindingResult.hasErrors()){
+            return "board/write";
+        }
         updatePost(post);
         return "redirect:detail.html?id=" + post.getId();
     }
@@ -134,13 +138,8 @@ public class BoardController {
     }
 
     // 게시글 삭제 요청을 처리하는 컨트롤러
-    public void deletePost(int id){
-        List<PostDto> posts = getPosts();
-        for(PostDto target : posts){
-            if(target.getId() == id){
-                posts.remove(target);
-                break;
-            }
-        }
+    @PostMapping("/delete")
+    public String deletePost(@RequestParam int id){
+        return "redirect:list.html";
     }
 }
